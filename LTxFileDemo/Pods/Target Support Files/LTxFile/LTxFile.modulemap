@@ -1,0 +1,6 @@
+framework module LTxFile {
+  umbrella header "LTxFile-umbrella.h"
+
+  export *
+  module * { export * }
+}
