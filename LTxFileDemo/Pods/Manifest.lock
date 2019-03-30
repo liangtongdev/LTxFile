@@ -1,7 +1,11 @@
 PODS:
   - LTxFile (0.0.1):
     - LTxFile/Core (= 0.0.1)
-  - LTxFile/Core (0.0.1)
+  - LTxFile/Core (0.0.1):
+    - LTxFile/Preview
+  - LTxFile/Preview (0.0.1):
+    - LTxFile/Utils
+  - LTxFile/Utils (0.0.1)
 
 DEPENDENCIES:
   - LTxFile (from `../`)
@@ -11,8 +15,8 @@ EXTERNAL SOURCES:
     :path: "../"
 
 SPEC CHECKSUMS:
-  LTxFile: 9aa4e76063feedeb8596cdae0f1607948d9126b1
+  LTxFile: b9ecf468ed150385ee1c403efa2740a56608d95e
 
 PODFILE CHECKSUM: 2f60d9aa5620146d1a7f2c2cbf45ac0940ba46f2
 
-COCOAPODS: 1.6.1
+COCOAPODS: 1.7.0.beta.3

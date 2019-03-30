@@ -11,6 +11,7 @@
 #endif
 
 #import "LTxFile.h"
+#import "LTxFilePreviewVideoSlider.h"
 #import "LTxFilePreviewViewController.h"
 #import "LTxFilePreviewViewModel.h"
 #import "LTxFileType.h"

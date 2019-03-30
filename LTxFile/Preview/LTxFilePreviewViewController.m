@@ -13,9 +13,14 @@
 #import "LTxFileTypeCheck.h"
 #import "LTxFilePreviewViewModel.h"
 
-@interface LTxFilePreviewViewController ()<QLPreviewControllerDataSource,WKNavigationDelegate>
+@interface LTxFilePreviewViewController ()<UIDocumentInteractionControllerDelegate,QLPreviewControllerDataSource,WKNavigationDelegate>
 @property (nonatomic, strong) LTxFilePreviewViewModel* viewModel;
 
+/**第三方应用分享**/
+@property (nonatomic, strong) UIButton* shareBtn;//第三方应用打开按钮，如果文件不使用第三方应用打开，则该按钮无效。
+@property (nonatomic, strong) UIDocumentInteractionController* docInteractionController;//第三方应用打开
+
+//提示信息
 @property (nonatomic, strong) UILabel* tipsL;
 
 /**QuickLook**/
@@ -38,10 +43,10 @@
 #pragma mark - life circle
 - (void)viewDidLoad {
     [super viewDidLoad];
-    
+    //初始化
     [self setupFilePreviewDefaults];
-    
-    [self startPreviewFile];
+    //服务启动
+    [self startPreviewService];
 }
 
 -(void)viewWillAppear:(BOOL)animated{
@@ -50,25 +55,108 @@
 
 -(void)viewWillDisappear:(BOOL)animated{
     [super viewWillDisappear:animated];
-}
--(void)dealloc{
-    
-    [[NSNotificationCenter defaultCenter] removeObserver:self];
-    
+
+    [self dellocProgressView];
     [self dellocQLPreview];
     [self dellocAVPlayer];
     [self dellocWebView];
-    _viewModel = nil;
+    if (_viewModel){
+        [_viewModel.session getTasksWithCompletionHandler:^(NSArray<NSURLSessionDataTask *> * _Nonnull dataTasks, NSArray<NSURLSessionUploadTask *> * _Nonnull uploadTasks, NSArray<NSURLSessionDownloadTask *> * _Nonnull downloadTasks) {
+            for (NSURLSessionDownloadTask* task in downloadTasks) {
+                [task cancel];
+            }
+        }];
+        _viewModel.session = nil;
+        _viewModel = nil;
+    }
+}
+-(void)dealloc{
+    [[NSNotificationCenter defaultCenter] removeObserver:self];
 }
 #pragma mark - 初始化
+
+/***
+ * 初始化界面
+ **/
 -(void)setupFilePreviewDefaults{
     self.view.backgroundColor = [UIColor whiteColor];
     _viewModel = [[LTxFilePreviewViewModel alloc] init];
+    //是否需要第三方应用打开
+    if (_shareWithOtherApp) {
+        _shareBtn = [[UIButton alloc] initWithFrame:CGRectMake(0, 0, 40, 20)];
+        [_shareBtn addTarget:self action:@selector(openWithOtherApp) forControlEvents:UIControlEventTouchUpInside];
+        [_shareBtn setTitle:@"分享" forState:UIControlStateNormal];
+        UIColor* textColor = _shareBtnTextColor?:[UIColor whiteColor];
+        [_shareBtn setTitleColor:textColor forState:UIControlStateNormal];
+        _shareBtn.titleLabel.font = [UIFont systemFontOfSize: 15.0];
+        self.navigationItem.rightBarButtonItem = [[UIBarButtonItem alloc] initWithCustomView:_shareBtn];
+    }
+    
     [self setupTipsView];
+    [self setupProgressView];
     
 }
 
--(void)startPreviewFile{
+/***
+ * 启动文件预览服务
+ **/
+-(void)startPreviewService{
+    if (_fileURL){//在线文件
+        
+        //首先判断，是否需要缓存文件，如果不需要，则直接通过网页的形式打开文件。
+        if (!_useCache || !_pathInSandbox){
+            /* 不使用缓存 */
+            _filePath = _fileURL;
+            [self setupWebPreviewView];
+        }else{
+            /* 使用缓存,首先判断文件是否存在，如果已存在则直接预览；否则走文件下载流程 */
+            NSString* absoluteString = [_fileURL absoluteString];
+            NSString* destFolderPath = [NSHomeDirectory() stringByAppendingPathComponent:_pathInSandbox];
+            NSFileManager *fileManager = [NSFileManager defaultManager];
+            NSString* saveName = [absoluteString lastPathComponent];
+            NSString* filePath = [destFolderPath stringByAppendingPathComponent:saveName];;
+            BOOL fileExist = [fileManager fileExistsAtPath:filePath];
+            if (fileExist){
+                /* 文件已经存在，注意中文名称的文件编码 */
+                NSURL* path = [NSURL fileURLWithPath:filePath];
+                if (path){
+                    _filePath = path;
+                }
+                [self startPreviewLocalFile];
+            }else{
+                /* 文件不存在，下载文件逻辑 */
+                __weak __typeof(self) weakSelf = self;
+                [_viewModel downloadFileWithURL:_fileURL fileSavePath:filePath progressChanged:^(CGFloat progress){
+                    __strong __typeof(weakSelf)strongSelf = weakSelf;
+                    dispatch_async(dispatch_get_main_queue(), ^{
+                        if (progress == 1) {
+                            strongSelf.progressView.hidden = YES;
+                            [strongSelf.progressView setProgress:0 animated:NO];
+                        }else {
+                            strongSelf.progressView.hidden = NO;
+                            [strongSelf.progressView setProgress:progress animated:YES];
+                        }
+                    });
+                } complete:^(){
+                    __strong __typeof(weakSelf)strongSelf = weakSelf;
+                    strongSelf.filePath =  [NSURL fileURLWithPath:filePath];
+                    dispatch_async(dispatch_get_main_queue(), ^{
+                        [strongSelf startPreviewLocalFile];
+                    });
+                } failed:^(NSString* errorDesc){
+                    __strong __typeof(weakSelf)strongSelf = weakSelf;
+                    dispatch_async(dispatch_get_main_queue(), ^{
+                        strongSelf.tipsL.text = errorDesc;
+                    });
+                }];
+            }
+        }
+    }else{//非在线文件，预览本地文件
+        [self startPreviewLocalFile];
+    }
+}
+
+-(void)startPreviewLocalFile{
     if (_filePath == nil) {
         _tipsL.text = @"文件不存在！";
         return;
@@ -94,6 +182,26 @@
             [self setupWebPreviewView];
         }
             break;
+    }
+}
+
+#pragma mark - 进度条
+-(void)setupProgressView{
+    if (_progressView) {
+        [_progressView removeFromSuperview];
+    }
+    CGFloat progressBarHeight = 5.f;
+    CGRect navigaitonBarBounds = self.navigationController.navigationBar.bounds;
+    CGRect progressFrame = CGRectMake(0, navigaitonBarBounds.size.height , navigaitonBarBounds.size.width, progressBarHeight);
+    _progressView = [[UIProgressView alloc] initWithFrame:progressFrame];
+    _progressView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleTopMargin;
+    _progressView.trackTintColor = [UIColor whiteColor];
+    _progressView.progressTintColor = _progressTintColor ? _progressTintColor : [UIColor blueColor];
+    [self.navigationController.navigationBar addSubview:_progressView];
+}
+-(void)dellocProgressView{
+    if (_progressView) {
+        [_progressView removeFromSuperview];
     }
 }
 
@@ -149,7 +257,7 @@
 -(void)observeAVPlayerProgress{
     __weak __typeof(self) weakSelf = self;
     _avPlayerObserver = [self.player addPeriodicTimeObserverForInterval:CMTimeMake(1, 1) queue:nil usingBlock:^(CMTime time) {
-        NSInteger currentTimeSec = time.value / time.timescale;
+        NSInteger currentTimeSec = (NSInteger) (time.value / time.timescale);
         weakSelf.playerSlider.value = currentTimeSec;
         CMTime totalTime = weakSelf.player.currentItem.duration;
         NSInteger totalTimeSec = CMTimeGetSeconds(totalTime);
@@ -172,7 +280,7 @@
     if ([ges.view isKindOfClass:[UISlider class]]) {
         UISlider *slider = (UISlider *)ges.view;
         CGPoint point = [ges locationInView:slider];
-        CGFloat length = slider.frame.size.width - LTxFilePreviewSliderTimeWidth - LTxFilePreviewSliderPadding;
+        CGFloat length = slider.frame.size.width - LTxFilePreviewSliderTimeWidth - LTxFilePreviewSliderPadding - LTxFilePreviewTimePadding;
         // 视频跳转的value
         CGFloat tapValue = point.x / length * slider.maximumValue;
         [self.player seekToTime:CMTimeMake(tapValue, 1)];
@@ -204,7 +312,7 @@
  * 时间描述
  **/
 -(NSString*)descriptionWithSeconds:(NSInteger)seconds{
-    NSString* retString = [NSString stringWithFormat:@"%02ld:%02ld",seconds / 60,seconds % 60];
+    NSString* retString = [NSString stringWithFormat:@"%02td:%02td",seconds / 60,seconds % 60];
     return retString;
 }
 
@@ -232,18 +340,6 @@
     _webView.navigationDelegate = self;
     [self.view addSubview:_webView];
     [self ltxFilePreview_pinSubview:_webView parentView:self.view edgeInsets:UIEdgeInsetsZero];
-
-    if (_progressView) {
-        [_progressView removeFromSuperview];
-    }
-    CGFloat progressBarHeight = 5.f;
-    CGRect navigaitonBarBounds = self.navigationController.navigationBar.bounds;
-    CGRect progressFrame = CGRectMake(0, navigaitonBarBounds.size.height , navigaitonBarBounds.size.width, progressBarHeight);
-    _progressView = [[UIProgressView alloc] initWithFrame:progressFrame];
-    _progressView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleTopMargin;
-    _progressView.trackTintColor = [UIColor whiteColor];
-    _progressView.progressTintColor = _progressTintColor ? _progressTintColor : [UIColor blueColor];
-    [self.navigationController.navigationBar addSubview:_progressView];
     
     [_webView addObserver:self forKeyPath:@"estimatedProgress" options:NSKeyValueObservingOptionNew context:nil];
     [_webView addObserver:self forKeyPath:@"title" options:NSKeyValueObservingOptionNew context:NULL];
@@ -254,9 +350,6 @@
 }
 
 - (void)dellocWebView{
-    if (_progressView) {
-        [_progressView removeFromSuperview];
-    }
     if (_webView) {
         [_webView removeObserver:self forKeyPath:@"estimatedProgress"];
         [_webView removeObserver:self forKeyPath:@"title"];
@@ -276,6 +369,18 @@
         _tipsL.font = [UIFont systemFontOfSize:20];
         [self ltxFilePreview_pinSubview:_tipsL parentView:self.view edgeInsets:UIEdgeInsetsMake(0, 30, 0, 30)];
     }
+}
+
+#pragma mark - 三方应用分享
+-(void)openWithOtherApp{
+    if(!_filePath){
+        return;
+    }
+    if ([_filePath.absoluteString hasPrefix:@"http"]) {
+        return;
+    }
+    _docInteractionController = [UIDocumentInteractionController  interactionControllerWithURL:_filePath];
+    [_docInteractionController presentOpenInMenuFromRect:self.shareBtn.frame inView:self.view animated:YES];
 }
 
 #pragma mark - 监听

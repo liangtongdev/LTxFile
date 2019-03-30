@@ -35,7 +35,9 @@
 		274144E4224E1C4E00DF0555 /* filePreview_local.MOV */ = {isa = PBXFileReference; lastKnownFileType = video.quicktime; path = filePreview_local.MOV; sourceTree = "<group>"; };
 		274144E5224E1C4E00DF0555 /* filePreview_local.jpeg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = filePreview_local.jpeg; sourceTree = "<group>"; };
 		274144ED224E2D1700DF0555 /* filePreview_local.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; path = filePreview_local.html; sourceTree = "<group>"; };
+		3E322AE70B244A802532A3D4 /* Pods-LTxFileDemo.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-LTxFileDemo.release.xcconfig"; path = "Pods/Target Support Files/Pods-LTxFileDemo/Pods-LTxFileDemo.release.xcconfig"; sourceTree = "<group>"; };
 		6612787306E5311B1512DA63 /* Pods_LTxFileDemo.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_LTxFileDemo.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		78DB8846A5D193597F170DAD /* Pods-LTxFileDemo.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-LTxFileDemo.debug.xcconfig"; path = "Pods/Target Support Files/Pods-LTxFileDemo/Pods-LTxFileDemo.debug.xcconfig"; sourceTree = "<group>"; };
 		D62D779033A064D5E2028340 /* Pods-LTxFileDemo.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-LTxFileDemo.release.xcconfig"; path = "Target Support Files/Pods-LTxFileDemo/Pods-LTxFileDemo.release.xcconfig"; sourceTree = "<group>"; };
 		D9D748DA512470EAB0CB7EE7 /* Pods-LTxFileDemo.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-LTxFileDemo.debug.xcconfig"; path = "Target Support Files/Pods-LTxFileDemo/Pods-LTxFileDemo.debug.xcconfig"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -103,6 +105,8 @@
 			children = (
 				D9D748DA512470EAB0CB7EE7 /* Pods-LTxFileDemo.debug.xcconfig */,
 				D62D779033A064D5E2028340 /* Pods-LTxFileDemo.release.xcconfig */,
+				78DB8846A5D193597F170DAD /* Pods-LTxFileDemo.debug.xcconfig */,
+				3E322AE70B244A802532A3D4 /* Pods-LTxFileDemo.release.xcconfig */,
 			);
 			path = Pods;
 			sourceTree = "<group>";
@@ -215,16 +219,11 @@
 			files = (
 			);
 			inputFileListPaths = (
-			);
-			inputPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-LTxFileDemo/Pods-LTxFileDemo-frameworks.sh",
-				"${BUILT_PRODUCTS_DIR}/LTxFile/LTxFile.framework",
+				"${PODS_ROOT}/Target Support Files/Pods-LTxFileDemo/Pods-LTxFileDemo-frameworks-${CONFIGURATION}-input-files.xcfilelist",
 			);
 			name = "[CP] Embed Pods Frameworks";
 			outputFileListPaths = (
-			);
-			outputPaths = (
-				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/LTxFile.framework",
+				"${PODS_ROOT}/Target Support Files/Pods-LTxFileDemo/Pods-LTxFileDemo-frameworks-${CONFIGURATION}-output-files.xcfilelist",
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
@@ -383,7 +382,9 @@
 			baseConfigurationReference = D9D748DA512470EAB0CB7EE7 /* Pods-LTxFileDemo.debug.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
 				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = "";
 				INFOPLIST_FILE = LTxFileDemo/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -391,6 +392,7 @@
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = liangtong.LTxFileDemo;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Debug;
@@ -400,7 +402,9 @@
 			baseConfigurationReference = D62D779033A064D5E2028340 /* Pods-LTxFileDemo.release.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
 				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = "";
 				INFOPLIST_FILE = LTxFileDemo/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -408,6 +412,7 @@
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = liangtong.LTxFileDemo;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Release;

@@ -31,7 +31,31 @@
         previewVC.filePath = [NSURL fileURLWithPath:[[NSBundle mainBundle] pathForResource:@"filePreview_local" ofType:@"MOV"]];
     }else if ([identifier isEqualToString:@"local html"]) {
         previewVC.filePath = [NSURL fileURLWithPath:[[NSBundle mainBundle] pathForResource:@"filePreview_local" ofType:@"html"]];
+    }else if ([identifier isEqualToString:@"cache online pdf"]) {
+        previewVC.fileURL = [NSURL URLWithString:@"https://developer.apple.com/ibeacon/Getting-Started-with-iBeacon.pdf"];
+        previewVC.useCache = true;
+        previewVC.pathInSandbox = @"Library/Caches";
+    }else if ([identifier isEqualToString:@"cache online video"]) {
+        previewVC.fileURL = [NSURL URLWithString:@"http://clips.vorwaerts-gmbh.de/big_buck_bunny.mp4"];
+        previewVC.useCache = true;
+        previewVC.pathInSandbox = @"Library/Caches";
+    }else if ([identifier isEqualToString:@"cache online html"]) {
+        previewVC.fileURL = [NSURL URLWithString:@"http://www.liangtong.site/about/index.html"];
+        previewVC.useCache = true;
+        previewVC.pathInSandbox = @"Library/Caches";
+    }else if ([identifier isEqualToString:@"online pdf"]) {
+        previewVC.fileURL = [NSURL URLWithString:@"https://developer.apple.com/ibeacon/Getting-Started-with-iBeacon.pdf"];
+    }else if ([identifier isEqualToString:@"online video"]) {
+        previewVC.fileURL = [NSURL URLWithString:@"http://clips.vorwaerts-gmbh.de/big_buck_bunny.mp4"];
+    }else if ([identifier isEqualToString:@"online html"]) {
+        previewVC.fileURL = [NSURL URLWithString:@"https://www.github.com/"];
+    }else if ([identifier isEqualToString:@"open with other"]) {
+        previewVC.filePath = [NSURL fileURLWithPath:[[NSBundle mainBundle] pathForResource:@"filePreview_local" ofType:@"pdf"]];
+        previewVC.shareWithOtherApp = true;
+        previewVC.shareBtnTextColor = [UIColor brownColor];
     }
+    
+    previewVC.title = [identifier uppercaseString];
     
     dispatch_async(dispatch_get_main_queue(), ^{
         [self.navigationController pushViewController:previewVC animated:true];

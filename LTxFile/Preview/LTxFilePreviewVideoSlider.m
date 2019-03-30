@@ -10,7 +10,7 @@
 @implementation LTxFilePreviewVideoSlider
 
 - (CGRect)trackRectForBounds:(CGRect)bounds{
-    return CGRectMake(LTxFilePreviewSliderPadding, CGRectGetHeight(bounds) / 2 - 2, CGRectGetWidth(self.frame) - ( LTxFilePreviewSliderTimeWidth + LTxFilePreviewSliderPadding), 4);
+    return CGRectMake(LTxFilePreviewSliderPadding, CGRectGetHeight(bounds) / 2 - 2, CGRectGetWidth(self.frame) - ( LTxFilePreviewSliderTimeWidth + LTxFilePreviewSliderPadding + LTxFilePreviewTimePadding), 4);
 }
 -(instancetype)init{
     self = [super init];
@@ -26,6 +26,6 @@
     return self;
 }
 -(void)drawRect:(CGRect)rect{
-    _timeL.frame = CGRectMake(CGRectGetWidth(rect) - LTxFilePreviewSliderTimeWidth, 0, LTxFilePreviewSliderTimeWidth, CGRectGetHeight(rect));
+    _timeL.frame = CGRectMake(CGRectGetWidth(rect) - LTxFilePreviewSliderTimeWidth - LTxFilePreviewTimePadding, 0, LTxFilePreviewSliderTimeWidth, CGRectGetHeight(rect));
 }
 @end

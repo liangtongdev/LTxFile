@@ -11,6 +11,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 #define LTxFilePreviewSliderTimeWidth 90
 #define LTxFilePreviewSliderPadding 20
+#define LTxFilePreviewTimePadding 10
 @interface LTxFilePreviewVideoSlider : UISlider
 @property (nonatomic, strong) UILabel* timeL;
 @end
