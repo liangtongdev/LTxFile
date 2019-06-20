@@ -424,7 +424,7 @@
     NSLayoutConstraint* leading = [NSLayoutConstraint constraintWithItem:subview attribute:NSLayoutAttributeLeading relatedBy:NSLayoutRelationEqual toItem:parentView attribute:NSLayoutAttributeLeading multiplier:1.f constant:edgeInsets.left];
     NSLayoutConstraint* trailing = [NSLayoutConstraint constraintWithItem:subview attribute:NSLayoutAttributeTrailing relatedBy:NSLayoutRelationEqual toItem:parentView attribute:NSLayoutAttributeTrailing multiplier:1.f constant:-edgeInsets.right];
     NSLayoutConstraint* top = [NSLayoutConstraint constraintWithItem:subview attribute:NSLayoutAttributeTopMargin relatedBy:NSLayoutRelationEqual toItem:parentView attribute:NSLayoutAttributeTopMargin multiplier:1.f constant:edgeInsets.top];
-    NSLayoutConstraint* bottom = [NSLayoutConstraint constraintWithItem:subview attribute:NSLayoutAttributeBottomMargin relatedBy:NSLayoutRelationEqual toItem:parentView attribute:NSLayoutAttributeBottomMargin multiplier:1.f constant:edgeInsets.bottom];
+    NSLayoutConstraint* bottom = [NSLayoutConstraint constraintWithItem:subview attribute:NSLayoutAttributeBottomMargin relatedBy:NSLayoutRelationEqual toItem:parentView attribute:NSLayoutAttributeBottom multiplier:1.f constant:edgeInsets.bottom];
     //激活
     [NSLayoutConstraint activateConstraints: @[leading,trailing,top,bottom]];
 }
